@@ -1,16 +1,112 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+# NEXORA — Personal Portfolio Platform
 
-Currently, two official plugins are available:
+A modern, responsive personal portfolio platform built using React and Vite. NEXORA showcases professional information, technical projects, and provides separate Admin and User dashboards.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Live Demo
 
-## React Compiler
+https://nexora-pro-sage.vercel.app/
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## GitHub Repository
 
-## Expanding the Oxlint configuration
+https://github.com/himana-dhulipala/NEXORA-PRO
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## About the Project
+
+NEXORA is designed to present a developer's profile, projects, and technical interests through a clean and interactive interface.
+
+It includes separate Admin and User modules with authentication and browser-based data persistence.
+
+## Features
+
+### Public Portfolio
+- Responsive portfolio homepage
+- Profile and About section
+- Project gallery
+- Project category filtering
+- Contact form
+
+### Admin Module
+- Admin login
+- Dashboard overview
+- Add and delete projects
+- View registered users
+- View contact messages
+- Portfolio settings
+
+### User Module
+- User registration
+- User login
+- User dashboard
+- Profile editing
+- LocalStorage-based data persistence
+
+## Technology Stack
+
+| Technology | Purpose |
+|---|---|
+| React | User interface |
+| Vite | Development and build tool |
+| JavaScript | Application functionality |
+| HTML5 | Page structure |
+| CSS3 | Styling and responsive design |
+| LocalStorage | Browser-side data persistence |
+| Git & GitHub | Version control |
+| Vercel | Deployment |
+
+## Installation and Setup
+
+Clone the repository:
+
+```bash
+git clone https://github.com/himana-dhulipala/NEXORA-PRO.git
+```
+
+Navigate into the project:
+
+```bash
+cd NEXORA-PRO
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+## Demo Admin Login
+
+Email: admin@nexora.com
+
+Password: Admin@123
+
+Note: These are demonstration credentials for academic evaluation only. Authentication is implemented on the client side using LocalStorage and is not intended for production security.
+
+## Developer
+
+**Himana Dhulipala**
+
+B.Tech — Computer Science and Engineering  
+KL University, Vijayawada
+
+## Deployment
+
+Deployed using Vercel.
+
+https://nexora-pro-sage.vercel.app/
+
+---
+
+Developed as a personal portfolio platform project.

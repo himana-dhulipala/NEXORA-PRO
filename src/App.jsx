@@ -70,6 +70,43 @@ export default function App() {
   const [projects, setProjects] = useState(() =>
     readStorage("nexora_projects", initialProjects)
   );
+  const [blogs, setBlogs] = useState(() =>
+  readStorage("nexora_blogs", [
+    {
+      id: 1,
+      title: "My Journey into Web Development",
+      category: "Development",
+      date: "November 2026",
+      description: "My learning journey exploring React, JavaScript, frontend development and building real-world projects."
+    },
+    {
+      id: 2,
+      title: "Building NEXORA",
+      category: "Projects",
+      date: "November 2026",
+      description: "The process of designing and developing my personal portfolio platform using React and CSS."
+    },
+    {
+      id: 3,
+      title: "Learning Beyond the Classroom",
+      category: "Learning",
+      date: "November 2026",
+      description: "Exploring programming, technical skills and new technologies through practical learning."
+    }
+  ])
+);
+  
+const [skills, setSkills] = useState(() =>
+  readStorage("nexora_skills", [
+    { id: 1, name: "HTML", level: "Intermediate" },
+    { id: 2, name: "CSS", level: "Intermediate" },
+    { id: 3, name: "JavaScript", level: "Beginner" },
+    { id: 4, name: "React", level: "Beginner" },
+    { id: 5, name: "Python", level: "Beginner" },
+    { id: 6, name: "C Programming", level: "Intermediate" }
+  ])
+);
+
   const [profile, setProfile] = useState(() =>
     readStorage("nexora_profile", initialProfile)
   );
@@ -85,6 +122,14 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("nexora_projects", JSON.stringify(projects));
   }, [projects]);
+
+  useEffect(() => {
+  localStorage.setItem("nexora_blogs", JSON.stringify(blogs));
+}, [blogs]);
+
+  useEffect(() => {
+  localStorage.setItem("nexora_skills", JSON.stringify(skills));
+}, [skills]);
 
   useEffect(() => {
     localStorage.setItem("nexora_profile", JSON.stringify(profile));
@@ -197,6 +242,64 @@ export default function App() {
     setProjects((previous) => previous.filter((item) => item.id !== id));
     notify("Project deleted.");
   }
+  function addBlog(blog) {
+  setBlogs((previous) => [
+    {
+      ...blog,
+      id: Date.now(),
+      date: new Date().toLocaleDateString("en-IN", {
+        month: "long",
+        year: "numeric"
+      })
+    },
+    ...previous
+  ]);
+
+  notify("Blog published successfully.");
+}
+
+function updateBlog(id, updatedBlog) {
+  setBlogs((previous) =>
+    previous.map((blog) =>
+      blog.id === id ? { ...blog, ...updatedBlog } : blog
+    )
+  );
+
+  notify("Blog updated successfully.");
+}
+
+function deleteBlog(id) {
+  setBlogs((previous) =>
+    previous.filter((blog) => blog.id !== id)
+  );
+
+  notify("Blog deleted successfully.");
+}
+
+function addSkill(skill) {
+  setSkills((previous) => [
+    { ...skill, id: Date.now() },
+    ...previous
+  ]);
+  notify("Skill added successfully.");
+}
+
+function updateSkill(id, updatedSkill) {
+  setSkills((previous) =>
+    previous.map((skill) =>
+      skill.id === id ? { ...skill, ...updatedSkill } : skill
+    )
+  );
+  notify("Skill updated successfully.");
+}
+
+function deleteSkill(id) {
+  setSkills((previous) =>
+    previous.filter((skill) => skill.id !== id)
+  );
+  notify("Skill deleted successfully.");
+}
+
 
   function sendMessage(message) {
     setMessages((previous) => [
@@ -216,13 +319,15 @@ export default function App() {
       />
 
       {page === "home" && (
-        <Home
-          profile={profile}
-          projects={projects}
-          navigate={navigate}
-          sendMessage={sendMessage}
-        />
-      )}
+  <Home
+    profile={profile}
+    projects={projects}
+    blogs={blogs}
+    skills={skills}
+    navigate={navigate}
+    sendMessage={sendMessage}
+  />
+)}
 
       {page === "login" && (
         <AuthPage
@@ -252,17 +357,25 @@ export default function App() {
       )}
 
       {page === "admin" && user?.role === "admin" && (
-        <AdminDashboard
-          users={users}
-          projects={projects}
-          messages={messages}
-          addProject={addProject}
-          deleteProject={deleteProject}
-          profile={profile}
-          setProfile={setProfile}
-          logout={logout}
-        />
-      )}
+  <AdminDashboard
+    users={users}
+    projects={projects}
+    messages={messages}
+    addProject={addProject}
+    deleteProject={deleteProject}
+    profile={profile}
+    setProfile={setProfile}
+    blogs={blogs}
+    addBlog={addBlog}
+    updateBlog={updateBlog}
+    deleteBlog={deleteBlog}
+    skills={skills}
+addSkill={addSkill}
+updateSkill={updateSkill}
+deleteSkill={deleteSkill}
+    logout={logout}
+  />
+)}
 
       {(page === "user" || page === "admin") && !user && (
         <AuthRequired navigate={navigate} />
@@ -320,7 +433,7 @@ function Navbar({ page, user, navigate, logout }) {
   );
 }
 
-function Home({ profile, projects, navigate, sendMessage }) {
+function Home({ profile, projects, blogs, skills, navigate, sendMessage }) {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [filter, setFilter] = useState("All");
 
@@ -399,16 +512,15 @@ function Home({ profile, projects, navigate, sendMessage }) {
       </section>
 
       <section className="tech-strip">
-        <div className="section-container tech-strip-inner">
-          <span>EXPLORING TECHNOLOGY</span>
-          <strong>JavaScript</strong>
-          <strong>React</strong>
-          <strong>Python</strong>
-          <strong>Java</strong>
-          <strong>HTML / CSS</strong>
-        </div>
-      </section>
+  <div className="section-container tech-strip-inner">
+    <span>EXPLORING TECHNOLOGY</span>
 
+    {skills && skills.map((skill) => (
+      <strong key={skill.id}>{skill.name}</strong>
+    ))}
+  </div>
+</section>
+      
       <section className="about-section section-container" id="about">
         <div className="section-heading">
           <div><span className="eyebrow">01 / ABOUT ME</span><h2>A little about <span>my journey.</span></h2></div>
@@ -471,7 +583,7 @@ function Home({ profile, projects, navigate, sendMessage }) {
           <p>Have a question, an opportunity or an interesting project in mind? Send me a message.</p>
           <div className="contact-note">✦ Always open to learning and collaboration.</div>
         </div>
-
+        <BlogSection blogs={blogs} />
         <form className="contact-form glass-card" onSubmit={handleContact}>
           <label>Your name<input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Enter your name" /></label>
           <label>Email address<input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" /></label>
@@ -483,6 +595,36 @@ function Home({ profile, projects, navigate, sendMessage }) {
   );
 }
 
+
+function BlogSection({ blogs }) {
+  return (
+    <section className="blog-section" id="blog">
+      <div className="section-heading">
+        <p className="section-label">MY WRITING</p>
+        <h2>Blog & Articles</h2>
+        <p>Thoughts, experiences and things I'm learning.</p>
+      </div>
+
+      <div className="blog-grid">
+        {blogs.length === 0 ? (
+          <p>No blog posts published yet.</p>
+        ) : (
+          blogs.map((post) => (
+            <article className="blog-card" key={post.id}>
+              <span className="blog-category">{post.category}</span>
+              <p className="blog-date">{post.date}</p>
+              <h3>{post.title}</h3>
+              <p>{post.description}</p>
+              <span className="blog-read-more">
+                NEXORA Journal ↗
+              </span>
+            </article>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
 function ProjectCard({ project, index }) {
   return (
     <article className="project-card">
@@ -631,10 +773,22 @@ function UserDashboard({ user, profile, setProfile, projects, navigate, logout }
   );
 }
 
-function AdminDashboard({ users, projects, messages, addProject, deleteProject, profile, setProfile, logout }) {
+function AdminDashboard({
+  users, projects, messages, addProject, deleteProject,
+  profile, setProfile, logout,
+  blogs, addBlog, updateBlog, deleteBlog,
+  skills, addSkill, updateSkill, deleteSkill,
+}) {
   const [tab, setTab] = useState("overview");
   const [projectForm, setProjectForm] = useState({ title: "", category: "Web Development", description: "", tech: "", status: "Completed" });
   const [profileDraft, setProfileDraft] = useState(profile);
+  const [blogForm, setBlogForm] = useState({
+  title: "",
+  category: "Development",
+  description: ""
+});
+
+const [editingBlog, setEditingBlog] = useState(null);
 
   function submitProject(event) {
     event.preventDefault();
@@ -649,6 +803,36 @@ function AdminDashboard({ users, projects, messages, addProject, deleteProject, 
     setProfile(profileDraft);
     alert("Portfolio profile updated successfully.");
   }
+  function submitBlog(event) {
+  event.preventDefault();
+
+  if (!blogForm.title.trim() || !blogForm.description.trim()) return;
+
+  if (editingBlog) {
+    updateBlog(editingBlog, blogForm);
+    setEditingBlog(null);
+  } else {
+    addBlog(blogForm);
+  }
+
+  setBlogForm({
+    title: "",
+    category: "Development",
+    description: ""
+  });
+
+  setTab("blog");
+}
+
+function editBlogPost(blog) {
+  setEditingBlog(blog.id);
+  setBlogForm({
+    title: blog.title,
+    category: blog.category,
+    description: blog.description
+  });
+  setTab("blog");
+}
 
   return (
     <main className="dashboard-page">
@@ -663,6 +847,8 @@ function AdminDashboard({ users, projects, messages, addProject, deleteProject, 
             ["add", "+ Add project"],
             ["users", "◎ Users"],
             ["messages", "✉ Messages"],
+            ["blog", "✎ Blog Management"],
+            ["skills", "✦ Skills Management"],
             ["settings", "⚙ Portfolio settings"],
           ].map(([id, label]) => (
             <button key={id} className={`sidebar-link ${tab === id ? "selected" : ""}`} onClick={() => setTab(id)}>{label}</button>
@@ -733,7 +919,213 @@ function AdminDashboard({ users, projects, messages, addProject, deleteProject, 
                 <button className="primary-btn" type="submit">Save portfolio settings</button>
               </form>
             </div>
+            
           )}
+          
+{tab === "blog" && (
+  <div className="dashboard-panel">
+    <div className="panel-heading">
+      <div>
+        <span className="eyebrow">CONTENT MANAGEMENT</span>
+        <h3>Blog Management</h3>
+        <p>Create and manage your portfolio articles.</p>
+      </div>
+    </div>
+
+    <form className="profile-edit-form" onSubmit={submitBlog}>
+      <label>
+        Blog title
+        <input
+          required
+          value={blogForm.title}
+          onChange={(e) =>
+            setBlogForm({ ...blogForm, title: e.target.value })
+          }
+          placeholder="Enter blog title"
+        />
+      </label>
+
+      <label>
+        Category
+        <select
+          value={blogForm.category}
+          onChange={(e) =>
+            setBlogForm({ ...blogForm, category: e.target.value })
+          }
+        >
+          <option>Development</option>
+          <option>Projects</option>
+          <option>Learning</option>
+          <option>Technology</option>
+        </select>
+      </label>
+
+      <label>
+        Description
+        <textarea
+          required
+          rows="4"
+          value={blogForm.description}
+          onChange={(e) =>
+            setBlogForm({ ...blogForm, description: e.target.value })
+          }
+          placeholder="Write your blog description"
+        />
+      </label>
+
+      <button className="primary-btn" type="submit">
+        {editingBlog ? "Update Blog" : "Publish Blog"} ↗
+      </button>
+
+      {editingBlog && (
+        <button
+          type="button"
+          className="small-action"
+          onClick={() => {
+            setEditingBlog(null);
+            setBlogForm({
+              title: "",
+              category: "Development",
+              description: ""
+            });
+          }}
+        >
+          Cancel editing
+        </button>
+      )}
+    </form>
+
+    <div className="panel-heading">
+      <h3>Published Articles ({blogs.length})</h3>
+    </div>
+
+    {blogs.length === 0 ? (
+      <EmptyState text="No blog posts published yet." />
+    ) : (
+      blogs.map((blog) => (
+        <div className="mini-project" key={blog.id}>
+          <div>
+            <strong>{blog.title}</strong>
+            <span>{blog.category}</span>
+          </div>
+
+          <button
+            className="small-action"
+            onClick={() => editBlogPost(blog)}
+          >
+            Edit
+          </button>
+
+          <button
+            className="delete-btn"
+            onClick={() => {
+              if (window.confirm(`Delete ${blog.title}?`)) {
+                deleteBlog(blog.id);
+              }
+            }}
+          >
+            Delete
+          </button>
+        </div>
+      ))
+    )}
+  </div>
+)}
+
+{tab === "skills" && (
+  <div className="dashboard-panel">
+    <div className="panel-heading">
+      <div>
+        <span className="eyebrow">PORTFOLIO MANAGEMENT</span>
+        <h3>Skills Management</h3>
+        <p>Add and manage your technical skills.</p>
+      </div>
+    </div>
+
+    <form
+      className="profile-edit-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const form = e.target;
+        const name = form.skillName.value.trim();
+        const level = form.skillLevel.value;
+
+        if (name) {
+          addSkill({ name, level });
+          form.reset();
+        }
+      }}
+    >
+      <label>
+        Skill Name
+        <input name="skillName" required placeholder="e.g. Java" />
+      </label>
+
+      <label>
+        Skill Level
+        <select name="skillLevel">
+          <option>Beginner</option>
+          <option>Intermediate</option>
+          <option>Advanced</option>
+        </select>
+      </label>
+
+      <button className="primary-btn" type="submit">
+        Add Skill ↗
+      </button>
+    </form>
+
+    <div className="panel-heading">
+      <h3>Your Skills ({skills.length})</h3>
+    </div>
+
+    {skills.map((skill) => (
+      <div className="mini-project" key={skill.id}>
+        <div>
+          <strong>{skill.name}</strong>
+          <span>{skill.level}</span>
+        </div>
+
+        <button
+          className="small-action"
+          onClick={() => {
+            const name = window.prompt("Edit skill name:", skill.name);
+            if (name && name.trim()) {
+              const level = window.prompt(
+                "Enter level: Beginner, Intermediate or Advanced",
+                skill.level
+              );
+              if (
+                level &&
+                ["Beginner", "Intermediate", "Advanced"].includes(level)
+              ) {
+                updateSkill(skill.id, {
+                  name: name.trim(),
+                  level
+                });
+              }
+            }
+          }}
+        >
+          Edit
+        </button>
+
+        <button
+          className="delete-btn"
+          onClick={() => {
+            if (window.confirm(`Delete ${skill.name}?`)) {
+              deleteSkill(skill.id);
+            }
+          }}
+        >
+          Delete
+        </button>
+      </div>
+    ))}
+  </div>
+)}
+
+
         </section>
       </div>
     </main>

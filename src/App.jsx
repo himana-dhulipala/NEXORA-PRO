@@ -348,8 +348,6 @@ function deleteSkill(id) {
       {page === "user" && user?.role === "user" && (
         <UserDashboard
           user={user}
-          profile={profile}
-          setProfile={setProfile}
           projects={projects}
           navigate={navigate}
           logout={logout}
@@ -575,7 +573,7 @@ function Home({ profile, projects, blogs, skills, navigate, sendMessage }) {
           ))}
         </div>
       </section>
-
+      <BlogSection blogs={blogs} />
       <section className="contact-section section-container" id="contact">
         <div className="contact-copy">
           <span className="eyebrow">03 / GET IN TOUCH</span>
@@ -583,7 +581,7 @@ function Home({ profile, projects, blogs, skills, navigate, sendMessage }) {
           <p>Have a question, an opportunity or an interesting project in mind? Send me a message.</p>
           <div className="contact-note">✦ Always open to learning and collaboration.</div>
         </div>
-        <BlogSection blogs={blogs} />
+       
         <form className="contact-form glass-card" onSubmit={handleContact}>
           <label>Your name<input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Enter your name" /></label>
           <label>Email address<input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" /></label>
@@ -681,13 +679,7 @@ function AuthPage({ mode, navigate, login, signup }) {
           <button className="primary-btn auth-submit" type="submit">{isLogin ? "Sign in" : "Create account"} <span>→</span></button>
         </form>
 
-        {isLogin && (
-          <div className="admin-hint">
-            <strong>Admin demo access</strong>
-            <span>Email: admin@nexora.com</span>
-            <span>Password: Admin@123</span>
-          </div>
-        )}
+        
 
         <p className="auth-switch">
           {isLogin ? "New to NEXORA?" : "Already have an account?"}
@@ -701,33 +693,69 @@ function AuthPage({ mode, navigate, login, signup }) {
   );
 }
 
-function UserDashboard({ user, profile, setProfile, projects, navigate, logout }) {
+function UserDashboard({ user, projects, navigate, logout }) {
+  const profileKey = `nexora_user_profile_${user.email.toLowerCase()}`;
+
   const [editing, setEditing] = useState(false);
+
+  const [profile, setProfile] = useState(() =>
+    readStorage(profileKey, {
+      name: user.name,
+      email: user.email,
+      role: "NEXORA User",
+      university: "",
+      year: "",
+      bio: "Welcome to your NEXORA workspace.",
+      github: "",
+      linkedin: ""
+    })
+  );
+
   const [draft, setDraft] = useState(profile);
 
   function saveProfile(event) {
     event.preventDefault();
-    setProfile(draft);
+
+    const updatedProfile = {
+      ...draft,
+      email: user.email
+    };
+
+    setProfile(updatedProfile);
+    localStorage.setItem(profileKey, JSON.stringify(updatedProfile));
     setEditing(false);
   }
 
   return (
     <main className="dashboard-page">
-      <DashboardHeader title="Your workspace" subtitle={`Welcome back, ${user.name}.`} logout={logout} />
+      <DashboardHeader
+        title="Your workspace"
+        subtitle={`Welcome back, ${user.name}.`}
+        logout={logout}
+      />
 
       <div className="dashboard-grid">
         <aside className="dashboard-sidebar">
           <span className="sidebar-label">WORKSPACE</span>
           <button className="sidebar-link selected">▦ Overview</button>
           <button className="sidebar-link" onClick={() => navigate("home")}>◈ View portfolio</button>
-          <button className="sidebar-link" onClick={() => setEditing(true)}>✎ Edit profile</button>
+          <button className="sidebar-link" onClick={() => {
+            setDraft(profile);
+            setEditing(true);
+          }}>✎ Edit profile</button>
           <button className="sidebar-link" onClick={logout}>↪ Sign out</button>
         </aside>
 
         <section className="dashboard-content">
           <div className="dashboard-welcome">
-            <div><span className="eyebrow">USER DASHBOARD</span><h2>Your creative space.</h2><p>Manage your profile and explore your portfolio.</p></div>
-            <div className="dashboard-avatar">{user.name.charAt(0).toUpperCase()}</div>
+            <div>
+              <span className="eyebrow">USER DASHBOARD</span>
+              <h2>Your creative space.</h2>
+              <p>Manage your profile and explore your portfolio.</p>
+            </div>
+            <div className="dashboard-avatar">
+              {user.name.charAt(0).toUpperCase()}
+            </div>
           </div>
 
           <div className="stats-grid">
@@ -737,16 +765,61 @@ function UserDashboard({ user, profile, setProfile, projects, navigate, logout }
           </div>
 
           <div className="dashboard-panel">
-            <div className="panel-heading"><div><span className="eyebrow">PROFILE MANAGEMENT</span><h3>Personal information</h3></div><button className="small-action" onClick={() => { setDraft(profile); setEditing(!editing); }}>{editing ? "Cancel" : "Edit profile"}</button></div>
+            <div className="panel-heading">
+              <div>
+                <span className="eyebrow">PROFILE MANAGEMENT</span>
+                <h3>Personal information</h3>
+              </div>
+              <button className="small-action" onClick={() => {
+                setDraft(profile);
+                setEditing(!editing);
+              }}>
+                {editing ? "Cancel" : "Edit profile"}
+              </button>
+            </div>
 
             {editing ? (
               <form className="profile-edit-form" onSubmit={saveProfile}>
-                <label>Full name<input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} required /></label>
-                <label>Role<input value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })} /></label>
-                <label>Email<input value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} /></label>
-                <label>About you<textarea rows="3" value={draft.bio} onChange={(e) => setDraft({ ...draft, bio: e.target.value })} /></label>
-                <label>GitHub URL<input value={draft.github} onChange={(e) => setDraft({ ...draft, github: e.target.value })} /></label>
-                <label>LinkedIn URL<input value={draft.linkedin} onChange={(e) => setDraft({ ...draft, linkedin: e.target.value })} /></label>
+                <label>Full name
+                  <input value={draft.name || ""} onChange={(e) => setDraft({ ...draft, name: e.target.value })} required />
+                </label>
+
+                <label>Role
+                  <input value={draft.role || ""} onChange={(e) => setDraft({ ...draft, role: e.target.value })} />
+                </label>
+
+                <label>Institution
+  <input
+    value={draft.university || ""}
+    onChange={(e) => setDraft({ ...draft, university: e.target.value })}
+    placeholder="Enter your institution"
+  />
+</label>
+
+<label>Academic level
+  <input
+    value={draft.year || ""}
+    onChange={(e) => setDraft({ ...draft, year: e.target.value })}
+    placeholder="Enter your academic year"
+  />
+</label>
+
+                <label>Email
+                  <input value={user.email} disabled />
+                </label>
+
+                <label>About you
+                  <textarea rows="3" value={draft.bio || ""} onChange={(e) => setDraft({ ...draft, bio: e.target.value })} />
+                </label>
+
+                <label>GitHub URL
+                  <input value={draft.github || ""} onChange={(e) => setDraft({ ...draft, github: e.target.value })} />
+                </label>
+
+                <label>LinkedIn URL
+                  <input value={draft.linkedin || ""} onChange={(e) => setDraft({ ...draft, linkedin: e.target.value })} />
+                </label>
+
                 <button className="primary-btn" type="submit">Save changes</button>
               </form>
             ) : (
@@ -762,9 +835,24 @@ function UserDashboard({ user, profile, setProfile, projects, navigate, logout }
           </div>
 
           <div className="dashboard-panel">
-            <div className="panel-heading"><div><span className="eyebrow">PORTFOLIO</span><h3>Featured projects</h3></div><button className="small-action" onClick={() => navigate("home")}>View all ↗</button></div>
+            <div className="panel-heading">
+              <div>
+                <span className="eyebrow">PORTFOLIO</span>
+                <h3>Featured projects</h3>
+              </div>
+              <button className="small-action" onClick={() => navigate("home")}>View all ↗</button>
+            </div>
+
             <div className="mini-project-list">
-              {projects.slice(0, 4).map((project) => <div className="mini-project" key={project.id}><div><strong>{project.title}</strong><span>{project.category}</span></div><span className="status-label">{project.status}</span></div>)}
+              {projects.slice(0, 4).map((project) => (
+                <div className="mini-project" key={project.id}>
+                  <div>
+                    <strong>{project.title}</strong>
+                    <span>{project.category}</span>
+                  </div>
+                  <span className="status-label">{project.status}</span>
+                </div>
+              ))}
             </div>
           </div>
         </section>
